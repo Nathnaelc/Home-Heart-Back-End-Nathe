@@ -1,3 +1,4 @@
+// Router endpoints for handling [login, registration, google login, logout]
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
@@ -7,6 +8,7 @@ const { BYCRYPT_SALT_ROUNDS } = require("../config");
 const passport = require("passport");
 require("./authGoogle.js");
 
+// google authentication section
 router.get(
   "/auth/google",
   passport.authenticate("google", {
@@ -14,43 +16,55 @@ router.get(
   })
 );
 
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/login",
-  }),
-  function (req, res) {
-    console.log("Google callback route called");
-
-    if (req.user) {
-      const token = jwt.sign(
-        {
-          userId: req.user.id,
-          username: req.user.username,
-          email: req.user.email,
-          firstName: req.user.first_name,
-          lastName: req.user.last_name,
-        },
-        "secret-key-unique",
-        {
-          expiresIn: "24h",
-        }
-      );
-
-      // Store the token in a cookie so it can be accessed by the client-side JavaScript
-      res.cookie("token", token, { httpOnly: true });
-
-      // Redirect to a page that is only accessible by authenticated users
-      res.redirect("/authenticated-page");
-    } else {
-      // Redirect to an error page
-      res.redirect("/account-not-registered");
-    }
+// google auth user verification endpoint
+router.get("/api/auth/user", function (req, res) {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).send({ message: "Not authenticated" });
   }
-);
+  try {
+    const user = jwt.verify(token, "secret-key-unique");
+    res.send({ user });
+  } catch {
+    res.status(401).send({ message: "Not authenticated" });
+  }
+});
 
+// google auth callback endpoint
+router.get("/auth/google/callback", function (req, res, next) {
+  passport.authenticate("google", function (err, user, info) {
+    if (err) {
+      console.error("Error during /auth/google/callback: ", err);
+      return next(err);
+    }
+    if (!user) {
+      console.log(info.message);
+      return res.redirect("http://localhost:5173/register");
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user.user_id,
+        username: user.username,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+      },
+      "secret-key-unique",
+      {
+        expiresIn: "24h",
+      }
+    );
+
+    // Instead of setting a cookie, redirect with the token in the URL
+    console.log("Successful login. User: ", user);
+    return res.redirect(`http://localhost:5173/home?token=${token}`);
+  })(req, res, next);
+});
+
+// Register endpoint for handling user registration
 router.post("/register", async (req, res) => {
-  const { username, email, password, first_name, last_name } = req.body;
+  const { username, email, password, firstName, lastName } = req.body;
   try {
     // using bcrypt to hash the password before storing
     const salt = await bcrypt.genSalt(BYCRYPT_SALT_ROUNDS);
@@ -69,8 +83,8 @@ router.post("/register", async (req, res) => {
       username,
       email.toLowerCase(),
       hashedPassword,
-      first_name,
-      last_name,
+      firstName,
+      lastName,
     ];
     const result = await pool.query(createUserQuery, values);
     const user = result.rows[0];
@@ -106,6 +120,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// Login endpoint for handling user login using username/email and password
 router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
   try {

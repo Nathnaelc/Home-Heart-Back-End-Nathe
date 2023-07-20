@@ -1,53 +1,60 @@
+// Google authnetication strategy function
+require("dotenv").config();
+
 const passport = require("passport");
-const pool = require("../db/db");
+const { pool } = require("../db/db");
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 //to be changed to env later
-const GOOGLE_CLIENT_ID =
-  "1009712286202-8u48bqqmub8um46dpcjk1hgvlhkmt1aa.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "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";
+// google strategy function
 passport.use(
   new GoogleStrategy(
     {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3001/google/callback",
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3001/api/auth/auth/google/callback",
       passReqToCallback: true,
     },
-    async function (accessToken, refreshToken, profile, cb) {
+    async function (request, accessToken, refreshToken, profile, done) {
+      console.log("GoogleStrategy callback function called");
+      const googleEmail = profile.emails[0].value;
       try {
         // Look up the user in your database using the Google ID in `profile.id`
-        let user = await pool.query(
-          `SELECT * FROM users WHERE google_id = $1`,
-          [profile.id]
-        );
+        let result = await pool.query(`SELECT * FROM users WHERE email = $1`, [
+          googleEmail,
+        ]);
+        console.log("User query result:", result.rows[0]);
 
-        if (user.rows.length === 0) {
+        if (result.rows.length === 0) {
           // If the user doesn't exist, create a new user with the information from `profile`
-          const createUserQuery = `INSERT INTO users (google_id, username, email, first_name, last_name) VALUES ($1, $2, $3, $4, $5) RETURNING *;`;
-          const values = [
-            profile.id,
-            profile.username,
-            profile.emails[0].value,
-            profile.name.givenName,
-            profile.name.familyName,
-          ];
-          const result = await pool.query(createUserQuery, values);
-          user = result.rows[0];
+          return done(null, false, {
+            message: "No user with that email in our records.",
+          });
         }
-        // Call `cb` with the user object to continue the authentication process
-        cb(null, user);
-      } catch (err) {
-        console.log(err);
+        let user = result.rows[0];
+        // check if the user was found and log them in
+        return done(null, user);
+      } catch (error) {
+        console.log(error);
+        return done(error);
       }
     }
   )
 );
+
 passport.serializeUser(function (user, cb) {
-  cb(null, user.id);
+  if (user) {
+    cb(null, user.user_id);
+  } else {
+    cb(new Error("User not found"), null);
+  }
 });
 
-passport.deserializeUser(function (id, cb) {
-  pool.query(`SELECT * FROM users WHERE id = $1`, [id], function (err, result) {
-    cb(err, result.rows[0]);
-  });
+passport.deserializeUser(async function (id, cb) {
+  let result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
+  if (result.rows.length > 0) {
+    let user = result.rows[0];
+    done(null, user.user_id);
+  } else {
+    done(new Error(`User with id ${user_id} not found`), null);
+  }
 });

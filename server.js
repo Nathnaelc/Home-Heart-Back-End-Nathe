@@ -9,7 +9,6 @@ const passport = require("passport");
 
 // Creating an express application
 const app = express();
-const authRoutes = require("./routes/authRoutes");
 
 // Enabling Cross-Origin Resource Sharing (CORS) with default configuration
 app.use(cors());
@@ -20,48 +19,31 @@ app.use(morgan("dev"));
 // Enabling express to parse JSON bodies from HTTP requests
 app.use(express.json());
 
-// Adding routes for authentication, exercises, and nutrition endpoints
-
-app.use("/api/auth", authRoutes); // route for the authentication pages (authRoutes.js)
-
 // Set up session middleware
 app.use(
   session({
-    secret: "your-session-secret", // replace with your own session secret
+    secret: "your-session-secret", // I will replace with a secret later
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // set to true if you're using https
+    cookie: { secure: false }, // false since we use http only
   })
 );
-
 // Initialize Passport and its session middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(passport.initialize());
-app.use(passport.session());
+// middleware for parsing cookies
+const cookieParser = require("cookie-parser");
+
+app.use(cookieParser());
+
+// Adding routes for authentication
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes); // route for the authentication pages (authRoutes.js)
 
 app.get("/auth/google", (req, res, next) => {
   passport.authenticate("google", {
     scope: ["profile", "email"],
-  })(req, res, next);
-});
-
-app.get("/auth/google/callback", function (req, res, next) {
-  passport.authenticate("google", function (err, user, info) {
-    if (err) {
-      console.error("Authentication error:", err);
-      return next(err);
-    }
-    if (!user) {
-      return res.redirect("/login");
-    }
-    req.logIn(user, function (err) {
-      if (err) {
-        return next(err);
-      }
-      return res.redirect("/");
-    });
   })(req, res, next);
 });
 
