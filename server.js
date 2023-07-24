@@ -34,12 +34,22 @@ app.use(passport.session());
 
 // middleware for parsing cookies
 const cookieParser = require("cookie-parser");
-
 app.use(cookieParser());
 
 // Adding routes for authentication
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes); // route for the authentication pages (authRoutes.js)
+
+// Adding routes for recommended professionals
+const gridRouter = require("./routes/authGrid");
+app.use("/api/recommended_professionals", gridRouter);
+app.use("/api/recommendations", gridRouter);
+
+// erorr detail printing
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send({ error: err.toString() });
+});
 
 app.get("/auth/google", (req, res, next) => {
   passport.authenticate("google", {

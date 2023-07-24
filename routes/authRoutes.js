@@ -92,7 +92,7 @@ router.post("/register", async (req, res) => {
     // JWT (JSON Web Token) is used for authentication. The token includes the user details
     const token = jwt.sign(
       {
-        userId: user.id,
+        userId: user.user_id,
         username: user.username,
         email: user.email,
         firstName: user.first_name,
@@ -140,7 +140,7 @@ router.post("/login", async (req, res) => {
     // JWT (JSON Web Token) is used for authentication. The token includes the user details
     const token = jwt.sign(
       {
-        userId: user.id,
+        userId: user.user_id,
         username: user.username,
         email: user.email,
         firstName: user.first_name,
@@ -155,7 +155,7 @@ router.post("/login", async (req, res) => {
     res.status(200).json({
       token: token,
       user: {
-        userId: user.id,
+        userId: user.user_id,
         username: user.username,
         email: user.email,
         first_name: user.first_name,

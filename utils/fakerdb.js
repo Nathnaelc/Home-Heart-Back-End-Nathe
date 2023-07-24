@@ -52,7 +52,7 @@ professionals.forEach((professional) => {
       } else {
         // Professional doesn't exist, insert a new record
         return db.none(
-          "INSERT INTO medical_professionals (professional_id, first_name, last_name, email, contact_number, years_of_experience, country_of_operation, language_proficiency, specialization, qualification, rating, date_joined, street_address, city, state_province, country, postal_code, latitude, longitude, verification_document, price, availability_start_time, availability_end_time, time_zone, bio) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)",
+          "INSERT INTO medical_professionals (professional_id, first_name, last_name, email, contact_number, years_of_experience, country_of_operation, language_proficiency, specialization, qualification, rating, date_joined, street_address, city, state_province, country, postal_code, latitude, longitude, verification_document, price, availability_start_time, availability_end_time, time_zone, bio) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)",
           [
             professional.professional_id,
             professional.first_name,
