@@ -47,6 +47,9 @@ app.use("/api/recommendations", gridRouter);
 const savedProfessionalsRouter = require("./routes/authSavedProfessionals");
 app.use("/api/saved_professionals", savedProfessionalsRouter);
 
+const medicalProfessionalRouter = require("./routes/authMedProf");
+app.use("/api/medical_professional", medicalProfessionalRouter);
+
 
 // erorr detail printing
 app.use((err, req, res, next) => {
