@@ -65,6 +65,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// code for fetching recommended professionals for a user
 router.get("/recommendations/:id", async (req, res) => {
   const id = req.params.id;
   try {

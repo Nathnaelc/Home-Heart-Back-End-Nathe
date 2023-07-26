@@ -6,6 +6,8 @@ const debug = require("debug");
 const PORT = process.env.PORT || 3001;
 const session = require("express-session");
 const passport = require("passport");
+const postCommentRouter = require("./routes/PostComment");
+const medicalProfessionalRouter = require("./routes/authMedProf");
 
 // Creating an express application
 const app = express();
@@ -50,9 +52,11 @@ app.use("/api/professional_details/:id", gridRouter);
 const savedProfessionalsRouter = require("./routes/authSavedProfessionals");
 app.use("/api/saved_professionals", savedProfessionalsRouter);
 
+app.use("/api/post_comment", postCommentRouter);
+
 // not clear why this is here? 
-const medicalProfessionalRouter = require("./routes/authMedProf");
-app.use("/api/medical_professional", medicalProfessionalRouter);
+//const medicalProfessionalRouter = require("./routes/authMedProf");
+//app.use("/api/medical_professional", medicalProfessionalRouter);
 
 // erorr detail printing
 app.use((err, req, res, next) => {

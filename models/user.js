@@ -1,5 +1,5 @@
 const db = require("../db/db.js");
-const { BadRequestError, UnauthorizedError } = require("../utils/errors.js");
+const { BadRequestError } = require("../utils/errors.js");
 
 class User {
   static async saveMedicalProfessional(professionalJSONDATA) {
@@ -12,7 +12,7 @@ class User {
     if (!professional) {
       throw new BadRequestError("No professional data provided");
     }
-
+    // Check if the professional object contains all the required fields
     const requiredFields = [
       "first_name",
       "last_name",
@@ -162,6 +162,29 @@ class User {
       // Handle any database or other errors that may occur during the query
       console.error("Error deleting professional data:", error);
       throw new Error("Failed to delete professional data");
+    }
+  }
+
+  static async createNewMedicalProfessionalComment(commentData) {
+    console.log("commentData: ", commentData);
+    console.log("date", commentData.date_posted);
+    if (!commentData) {
+      throw new BadRequestError("No comment data provided");
+    }
+
+    try {
+      const { rows } = await db.pool.query(
+        "INSERT INTO user_reviews (user_id, professional_id, review_text, rating, date_posted) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
+        [
+          commentData.user_id,
+          commentData.professional_id,
+          commentData.comment,
+          commentData.rating,
+        ]
+      );
+      return rows[0];
+    } catch (err) {
+      console.log("error:", err);
     }
   }
 }
