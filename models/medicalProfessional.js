@@ -44,8 +44,8 @@ class MedicalProfessional {
     
             // Wait for all the promises to resolve
             const updatedRows = await Promise.all(promises);
-    
-            return updatedRows;
+            // console.log("updatedRows: ", updatedRows.professional_details); 
+            return updatedRows.professional_details;
         } catch (err) {
             console.log("error:", err);
             throw new Error("Failed to fetch medical professional comments");
