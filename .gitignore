@@ -1,2 +1,10 @@
 node_modules
+medical_professionals_without_bios.json
 .env
+biogenerator.json
+biocombiner.js
+faker.js
+BucketUrl.py
+model.pkl
+recommendations.py
+Recommendation system.ipynb
