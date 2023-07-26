@@ -112,7 +112,7 @@ class User {
 
         try {
             
-            const { rows } = await db.pool.query('INSERT INTO user_reviews (user_id, professional_id, review_text, rating, date_posted) VALUES ($1, $2, $3, $4, NOW()) RETURNING *', [commentData.user_id, commentData.professional_id, commentData.comment, commentData.rating]);
+            const { rows } = await db.pool.query('INSERT INTO user_reviews (user_id, professional_id, review_text, rating, review_heading, date_posted) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *', [commentData.user_id, commentData.professional_id, commentData.comment, commentData.rating, commentData.heading]);
             return rows[0]; 
 
         } catch (err) {
