@@ -12,7 +12,7 @@ class User {
     if (!professional) {
       throw new BadRequestError("No professional data provided");
     }
-
+    // Check if the professional object contains all the required fields
     const requiredFields = [
       "first_name",
       "last_name",
