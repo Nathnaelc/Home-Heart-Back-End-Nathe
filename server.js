@@ -43,10 +43,10 @@ app.use("/api/auth", authRoutes); // route for the authentication pages (authRou
 const gridRouter = require("./routes/authGrid");
 app.use("/api/recommended_professionals", gridRouter);
 app.use("/api/recommendations", gridRouter);
+app.use("/api/professional_details/:id", gridRouter);
 
 const savedProfessionalsRouter = require("./routes/authSavedProfessionals");
 app.use("/api/saved_professionals", savedProfessionalsRouter);
-
 
 // erorr detail printing
 app.use((err, req, res, next) => {
@@ -59,7 +59,6 @@ app.get("/auth/google", (req, res, next) => {
     scope: ["profile", "email"],
   })(req, res, next);
 });
-
 
 // Start listening on the defined port
 app.listen(PORT, () => {
