@@ -37,7 +37,7 @@ router.post("/addSavedProfessional", async (req, res) => {
             result: req.body
     })} 
     catch (err) {
-        next(err)
+        console.log("here"); 
     };
  
 }); 
