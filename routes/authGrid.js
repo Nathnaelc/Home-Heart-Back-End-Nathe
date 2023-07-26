@@ -2,32 +2,39 @@ const express = require("express");
 const router = express.Router();
 const { pool } = require("../db/db");
 const axios = require("axios");
+const MedicalProfessional = require("../models/medicalProfessional");
 router.get("/", async (req, res) => {
   const result = await pool.query("SELECT * FROM medical_professionals");
   res.json(result.rows);
 });
 
-// router.get("/:id", async (req, res) => {
-//   const id = req.params.id;
+// code for fetching a single professionals details
+router.get("/professional_details/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log("router called");
+  try {
+    const result = await MedicalProfessional.fetchMedicalProfessionalById(
+      req.params.professional_id
+    );
+    if (result == null) {
+      return res.status(200).json({
+        message: "No professional found",
+        result: [],
+      });
+    } else {
+      console.log("result: ", result);
+      return res.status(200).json({
+        message: "Professional successfully got",
+        result: result,
+      });
+    }
+  } catch (err) {
+    console.log("HERE");
+    return;
+  }
+});
 
-//   try {
-//     const result = await pool.query(
-//       "SELECT * FROM medical_professionals WHERE professional_id = $1",
-//       [id]
-//     );
-//     if (result.rows.length > 0) {
-//       res.json(result.rows[0]); // return the first row if a match is found
-//     } else {
-//       res.status(404).json({ message: "Professional not found" });
-//     }
-//   } catch (err) {
-//     res.status(500).json({
-//       message: "Error fetching professional",
-//       error: err.message,
-//     });
-//   }
-// });
-
+// code for recommeding professionals
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
 

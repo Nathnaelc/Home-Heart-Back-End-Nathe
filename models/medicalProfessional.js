@@ -54,3 +54,4 @@ class MedicalProfessional {
 }
 
 module.exports = MedicalProfessional;
+
