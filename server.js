@@ -55,8 +55,8 @@ app.use("/api/saved_professionals", savedProfessionalsRouter);
 app.use("/api/post_comment", postCommentRouter);
 
 // not clear why this is here? 
-//const medicalProfessionalRouter = require("./routes/authMedProf");
-//app.use("/api/medical_professional", medicalProfessionalRouter);
+// const medicalProfessionalRouter = require("./routes/authMedProf");
+app.use("/api/medical_professional", medicalProfessionalRouter);
 
 // erorr detail printing
 app.use((err, req, res, next) => {
