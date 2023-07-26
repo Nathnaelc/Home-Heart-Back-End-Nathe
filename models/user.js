@@ -1,5 +1,5 @@
 const db = require("../db/db.js");
-const { BadRequestError, UnauthorizedError } = require("../utils/errors.js");
+const { BadRequestError } = require("../utils/errors.js");
 
 class User {
   static async saveMedicalProfessional(professionalJSONDATA) {
