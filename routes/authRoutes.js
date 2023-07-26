@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const { pool } = require("../db/db");
 const { BYCRYPT_SALT_ROUNDS } = require("../config");
 const passport = require("passport");
+const User = require("../models/user");
 require("./authGoogle.js");
 
 // google authentication section
@@ -170,5 +171,21 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+
+router.post("/createUserComment", async (req, res) => {
+
+  try {
+    console.log("req.body: ", req.body); 
+    const result = await User.createNewMedicalProfessionalComment(req.body);
+    console.log("result: ", result);
+    return res.status(200).json({
+      message: "Comment successfully created",
+      result: result
+    })
+  } catch (err) {
+    console.log("error:", err)
+  }
+})
+
 
 module.exports = router;

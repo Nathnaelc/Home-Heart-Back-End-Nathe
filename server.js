@@ -39,14 +39,20 @@ app.use(cookieParser());
 // Adding routes for authentication
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes); // route for the authentication pages (authRoutes.js)
+
 // Adding routes for recommended professionals
 const gridRouter = require("./routes/authGrid");
 app.use("/api/recommended_professionals", gridRouter);
 app.use("/api/recommendations", gridRouter);
 app.use("/api/professional_details/:id", gridRouter);
 
+// Route for saved professionals
 const savedProfessionalsRouter = require("./routes/authSavedProfessionals");
 app.use("/api/saved_professionals", savedProfessionalsRouter);
+
+// not clear why this is here? 
+const medicalProfessionalRouter = require("./routes/authMedProf");
+app.use("/api/medical_professional", medicalProfessionalRouter);
 
 // erorr detail printing
 app.use((err, req, res, next) => {
