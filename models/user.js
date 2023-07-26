@@ -141,6 +141,29 @@ class User {
       throw new Error("Failed to delete professional data");
     }
   }
+
+  static async createNewMedicalProfessionalComment(commentData) {
+    console.log("commentData: ", commentData);
+    console.log("date", commentData.date_posted);
+    if (!commentData) {
+      throw new BadRequestError("No comment data provided");
+    }
+
+    try {
+      const { rows } = await db.pool.query(
+        "INSERT INTO user_reviews (user_id, professional_id, review_text, rating, date_posted) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
+        [
+          commentData.user_id,
+          commentData.professional_id,
+          commentData.comment,
+          commentData.rating,
+        ]
+      );
+      return rows[0];
+    } catch (err) {
+      console.log("error:", err);
+    }
+  }
 }
 
 module.exports = User;
