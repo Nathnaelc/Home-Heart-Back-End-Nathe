@@ -23,7 +23,9 @@ router.get("/getAllSaved/:userID", async (req, res) => {
 })
   
 router.post("/addSavedProfessional", async (req, res) => {
-  
+    
+    console.log("req.body: ", req.body);
+
     try {
         const savedProf = await User.saveMedicalProfessional(req.body);
         if (savedProf == false) {
@@ -39,25 +41,27 @@ router.post("/addSavedProfessional", async (req, res) => {
     catch (err) {
         console.log("here"); 
     };
- 
 }); 
 
 router.delete("/deleteSavedProfessional", async (req, res) => {
     console.log("req.body: ", req.body); 
+
+    const { user_id, professional_id } = req.body;
+
     try {
-        const deletedProf = await User.deleteSavedMedicalProfessional(req.body.user_id, req.body.professional.professional_id);
+        const deletedProf = await User.deleteSavedMedicalProfessional(parseInt(user_id), parseInt(professional_id));
         if (deletedProf == false) {
             return res.status(200).json({
             message: "Professional not saved",
-            result: await User.getSavedMedicalProfessionals(req.body.user_id)
+            result: await User.getSavedMedicalProfessionals(req.body.user_id),
         })
         }
         return res.status(200).json({
             message: "Professional deleted successfully",
-            result: req.body
+            result: req.body,
     })} 
     catch (err) {
-        console.log("HERE")
+        console.log("error", err); 
     };
 }); 
 

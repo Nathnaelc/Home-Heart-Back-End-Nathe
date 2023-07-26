@@ -8,6 +8,7 @@ const session = require("express-session");
 const passport = require("passport");
 const postCommentRouter = require("./routes/PostComment");
 const medicalProfessionalRouter = require("./routes/authMedProf");
+const savedProfessionalsRouter = require("./routes/SavedProfessionals");
 
 // Creating an express application
 const app = express();
@@ -49,14 +50,13 @@ app.use("/api/recommendations", gridRouter);
 app.use("/api/professional_details/:id", gridRouter);
 
 // Route for saved professionals
-const savedProfessionalsRouter = require("./routes/authSavedProfessionals");
 app.use("/api/saved_professionals", savedProfessionalsRouter);
 
 app.use("/api/post_comment", postCommentRouter);
 
 // not clear why this is here? 
-//const medicalProfessionalRouter = require("./routes/authMedProf");
-//app.use("/api/medical_professional", medicalProfessionalRouter);
+// const medicalProfessionalRouter = require("./routes/authMedProf");
+app.use("/api/medical_professional", medicalProfessionalRouter);
 
 // erorr detail printing
 app.use((err, req, res, next) => {
