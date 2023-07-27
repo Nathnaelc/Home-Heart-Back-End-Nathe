@@ -18,6 +18,9 @@ class MedicalProfessional {
     }
 
     static async fetchMedicalProfessionalComments(professional_id) {
+
+        console.log("professional_id: ", professional_id)
+
         if (!professional_id) {
             throw new BadRequestError("No professional id provided");
         }
@@ -28,7 +31,7 @@ class MedicalProfessional {
                 'SELECT user_id, review_text, date_posted, rating, review_heading FROM user_reviews WHERE professional_id = $1',
                 [professional_id]
             );
-    
+            
             // Create an array to store the promises for fetching user details
             const promises = rows.map(async (row) => {
                 // Fetch user's first and last name from the users table based on user_id
@@ -39,13 +42,15 @@ class MedicalProfessional {
                 // Assign the user's first name and last name to the row object
                 row.first_name = userData.rows[0].first_name;
                 row.last_name = userData.rows[0].last_name;
+                console.log("row: ", row)
                 return row; // Return the updated row object
             });
     
             // Wait for all the promises to resolve
             const updatedRows = await Promise.all(promises);
-            // console.log("updatedRows: ", updatedRows.professional_details); 
-            return updatedRows.professional_details;
+            // console.log("updatedRows: ", updatedRows.professional_details);
+            console.log("updatedRows: ", updatedRows) 
+            return updatedRows;
         } catch (err) {
             console.log("error:", err);
             throw new Error("Failed to fetch medical professional comments");
