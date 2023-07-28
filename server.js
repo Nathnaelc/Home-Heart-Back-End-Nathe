@@ -9,7 +9,7 @@ const passport = require("passport");
 const postCommentRouter = require("./routes/PostComment");
 const medicalProfessionalRouter = require("./routes/authMedProf");
 const savedProfessionalsRouter = require("./routes/SavedProfessionals");
-
+const UpdateUserInformationRouter = require("./routes/UpdateUserInformation")
 // Creating an express application
 const app = express();
 
@@ -57,6 +57,8 @@ app.use("/api/post_comment", postCommentRouter);
 // not clear why this is here? 
 // const medicalProfessionalRouter = require("./routes/authMedProf");
 app.use("/api/medical_professional", medicalProfessionalRouter);
+
+app.use("/api/update_user_information", UpdateUserInformationRouter);
 
 // erorr detail printing
 app.use((err, req, res, next) => {
