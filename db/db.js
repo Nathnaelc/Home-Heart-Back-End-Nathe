@@ -10,8 +10,10 @@ const pool = new Pool({
 
 module.exports = {
   pool,
+  query: (text, params) => pool.query(text, params),
 };
 
+// code for manually creating tables in postgres pgadmin
 // const usersSqlScript = `
 // CREATE TABLE IF NOT EXISTS users (
 //     user_id SERIAL PRIMARY KEY,

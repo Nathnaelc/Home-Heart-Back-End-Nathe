@@ -30,13 +30,17 @@
     "faker": "^5.5.3",
     "jsonwebtoken": "^9.0.1",
     "jwt-decode": "^3.1.2",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.1",
     "passport": "^0.6.0",
     "passport-google-oauth2": "^0.2.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.11.1",
-    "pg-promise": "^11.5.0"
+    "pg-hstore": "^2.3.4",
+    "pg-promise": "^11.5.0",
+    "sequelize": "^6.32.1"
   },
   "nodemonConfig": {
     "restartable": "rs",

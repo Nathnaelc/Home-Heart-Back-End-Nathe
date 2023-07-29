@@ -6,9 +6,11 @@ const debug = require("debug");
 const PORT = process.env.PORT || 3001;
 const session = require("express-session");
 const passport = require("passport");
+const bodyParser = require("body-parser");
 const postCommentRouter = require("./routes/PostComment");
 const medicalProfessionalRouter = require("./routes/authMedProf");
 const savedProfessionalsRouter = require("./routes/SavedProfessionals");
+const appointmentsRouter = require("./routes/appointmentsApi");
 
 // Creating an express application
 const app = express();
@@ -21,6 +23,10 @@ app.use(morgan("dev"));
 
 // Enabling express to parse JSON bodies from HTTP requests
 app.use(express.json());
+
+// Enabling express to parse URL-encoded bodies from HTTP requests
+// interpret the body data sent through requests (e.g. req.body) as JSON object
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Set up session middleware
 app.use(
@@ -49,13 +55,14 @@ app.use("/api/recommended_professionals", gridRouter);
 app.use("/api/recommendations", gridRouter);
 app.use("/api/professional_details/:id", gridRouter);
 
+// Adding routes for appointments
+app.use("/api/appointments", appointmentsRouter);
+
 // Route for saved professionals
 app.use("/api/saved_professionals", savedProfessionalsRouter);
 
 app.use("/api/post_comment", postCommentRouter);
 
-// not clear why this is here? 
-// const medicalProfessionalRouter = require("./routes/authMedProf");
 app.use("/api/medical_professional", medicalProfessionalRouter);
 
 // erorr detail printing
