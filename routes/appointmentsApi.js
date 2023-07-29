@@ -168,18 +168,54 @@ router.post("/booking", async (req, res) => {
 
 // update appointment status
 // the endpoint is /api/appointments/:appointmentId with PUT method
+// update appointment status
 router.put("/:appointmentId", async (req, res) => {
   try {
     const { appointmentId } = req.params;
-    const { status } = req.body;
+    const { appointment_start, appointment_end, status } = req.body;
+
+    // Convert the appointment_start and appointment_end to UTC
+    const utcAppointmentStart = moment
+      .tz(appointment_start, "America/Los_Angeles")
+      .utc()
+      .format("YYYY-MM-DD HH:mm:ss");
+    const utcAppointmentEnd = moment
+      .tz(appointment_end, "America/Los_Angeles")
+      .utc()
+      .format("YYYY-MM-DD HH:mm:ss");
+
+    // Fetch the existing appointments for overlapping check
+    const { rows: existingAppointments } = await db.query(
+      "SELECT * FROM appointments WHERE appointment_id != $1",
+      [appointmentId]
+    );
+
+    // Check if the appointment is overlapping with any existing appointments
+    const isOverlapping = existingAppointments.some((app) => {
+      const appStart = moment(app.appointment_start, "YYYY-MM-DD HH:mm:ss");
+      const appEnd = moment(app.appointment_end, "YYYY-MM-DD HH:mm:ss");
+      return (
+        utcAppointmentStart.isBetween(appStart, appEnd, null, "()") ||
+        utcAppointmentEnd.isBetween(appStart, appEnd, null, "()") ||
+        (utcAppointmentStart.isSameOrBefore(appStart) &&
+          utcAppointmentEnd.isSameOrAfter(appEnd))
+      );
+    });
+
+    // If there is an overlap, return an error
+    if (isOverlapping) {
+      return res.status(400).json({
+        message: "Updated time slot overlaps with an existing appointment",
+      });
+    }
 
     const { rows } = await db.query(
       `
       UPDATE appointments
-      SET status = $1
-      WHERE appointment_id = $2
+      SET appointment_start = $1, appointment_end = $2, status = $3
+      WHERE appointment_id = $4
       RETURNING *`,
-      [status, appointmentId]
+      [utcAppointmentStart, utcAppointmentEnd, status, appointmentId]
     );
 
     res.json({
