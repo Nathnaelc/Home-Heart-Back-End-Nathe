@@ -11,7 +11,7 @@ const postCommentRouter = require("./routes/PostComment");
 const medicalProfessionalRouter = require("./routes/authMedProf");
 const savedProfessionalsRouter = require("./routes/SavedProfessionals");
 const appointmentsRouter = require("./routes/appointmentsApi");
-
+const UpdateUserInformationRouter = require("./routes/UpdateUserInformation")
 // Creating an express application
 const app = express();
 
@@ -64,6 +64,8 @@ app.use("/api/saved_professionals", savedProfessionalsRouter);
 app.use("/api/post_comment", postCommentRouter);
 
 app.use("/api/medical_professional", medicalProfessionalRouter);
+
+app.use("/api/update_user_information", UpdateUserInformationRouter);
 
 // erorr detail printing
 app.use((err, req, res, next) => {

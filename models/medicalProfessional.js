@@ -22,7 +22,7 @@ class MedicalProfessional {
     if (!professional_id) {
       throw new BadRequestError("No professional id provided");
     }
-
+    
     try {
       // Get all of the comments for this medical professional along with user_id
       const { rows } = await db.pool.query(
