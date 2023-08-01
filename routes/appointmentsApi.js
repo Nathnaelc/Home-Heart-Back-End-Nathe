@@ -70,22 +70,21 @@ router.post("/booking", async (req, res) => {
       status,
     } = req.body;
 
-    // Convert the appointment_start and appointment_end to UTC before storing them in the database
-    const utcAppointmentStart = moment
-      .tz(appointment_start, "America/Los_Angeles")
-      .utc()
-      .format("YYYY-MM-DD HH:mm:ss");
-    const utcAppointmentEnd = moment
-      .tz(appointment_end, "America/Los_Angeles")
-      .utc()
-      .format("YYYY-MM-DD HH:mm:ss");
+    const formatAppointmentStart = moment(
+      appointment_start,
+      "YYYY-MM-DD HH:mm:ss"
+    ).format("YYYY-MM-DD HH:mm:ss");
+    const formatAppointmentEnd = moment(
+      appointment_end,
+      "YYYY-MM-DD HH:mm:ss"
+    ).format("YYYY-MM-DD HH:mm:ss");
 
-    console.log(`utcAppointmentStart: ${utcAppointmentStart}`);
-    console.log(`utcAppointmentEnd: ${utcAppointmentEnd}`);
+    console.log(`formatAppointmentStart: ${formatAppointmentStart}`);
+    console.log(`formatAppointmentEnd: ${formatAppointmentEnd}`);
 
     // Convert the date to a day of the week so I can match it with the professional's availability table
-    const date = new Date(utcAppointmentStart.split(" ")[0]);
-    const dayOfWeek = date.getUTCDay();
+    const date = new Date(formatAppointmentStart.split(" ")[0]);
+    const dayOfWeek = date.getDay();
 
     // Fetch the professional's availability for the selected day of the week
     const { rows: availabilities } = await db.query(
@@ -97,17 +96,17 @@ router.post("/booking", async (req, res) => {
 
     // Check if selected time slot is within professional's availability
     const selectedStartTime = moment(
-      utcAppointmentStart,
+      formatAppointmentStart,
       "YYYY-MM-DD HH:mm:ss"
     );
-    const selectedEndTime = moment(utcAppointmentEnd, "YYYY-MM-DD HH:mm:ss");
+    const selectedEndTime = moment(formatAppointmentEnd, "YYYY-MM-DD HH:mm:ss");
     const isWithinAvailability = availabilities.some((avail) => {
       const availStartTime = moment(
-        utcAppointmentStart.split(" ")[0] + " " + avail.start_time,
+        formatAppointmentStart.split(" ")[0] + " " + avail.start_time,
         "YYYY-MM-DD HH:mm:ss"
       );
       const availEndTime = moment(
-        utcAppointmentStart.split(" ")[0] + " " + avail.end_time,
+        formatAppointmentStart.split(" ")[0] + " " + avail.end_time,
         "YYYY-MM-DD HH:mm:ss"
       );
       console.log(`avail.start_time: ${avail.start_time}`);
@@ -156,7 +155,13 @@ router.post("/booking", async (req, res) => {
     // If everything is fine, create the appointment
     const { rows } = await db.query(
       "INSERT INTO appointments (user_id, professional_id, appointment_start, appointment_end, status) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [user_id, professional_id, utcAppointmentStart, utcAppointmentEnd, status]
+      [
+        user_id,
+        professional_id,
+        formatAppointmentStart,
+        formatAppointmentEnd,
+        status,
+      ]
     );
     console.log("Appointment booked successfully:", rows[0]);
     res.json(rows[0]);
@@ -174,15 +179,15 @@ router.put("/:appointmentId", async (req, res) => {
     const { appointmentId } = req.params;
     const { appointment_start, appointment_end, status } = req.body;
 
-    // Convert the appointment_start and appointment_end to UTC
-    const utcAppointmentStart = moment
-      .tz(appointment_start, "America/Los_Angeles")
-      .utc()
-      .format("YYYY-MM-DD HH:mm:ss");
-    const utcAppointmentEnd = moment
-      .tz(appointment_end, "America/Los_Angeles")
-      .utc()
-      .format("YYYY-MM-DD HH:mm:ss");
+    const selectedAppointmentStartMoment = moment(appointment_start);
+    const selectedAppointmentEndMoment = moment(appointment_end);
+
+    const selectedAppointmentStart = selectedAppointmentStartMoment.format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
+    const selectedAppointmentEnd = selectedAppointmentEndMoment.format(
+      "YYYY-MM-DD HH:mm:ss"
+    );
 
     // Fetch the existing appointments for overlapping check
     const { rows: existingAppointments } = await db.query(
@@ -192,13 +197,18 @@ router.put("/:appointmentId", async (req, res) => {
 
     // Check if the appointment is overlapping with any existing appointments
     const isOverlapping = existingAppointments.some((app) => {
-      const appStart = moment(app.appointment_start, "YYYY-MM-DD HH:mm:ss");
-      const appEnd = moment(app.appointment_end, "YYYY-MM-DD HH:mm:ss");
+      const appStart = moment(app.appointment_start);
+      const appEnd = moment(app.appointment_end);
       return (
-        utcAppointmentStart.isBetween(appStart, appEnd, null, "()") ||
-        utcAppointmentEnd.isBetween(appStart, appEnd, null, "()") ||
-        (utcAppointmentStart.isSameOrBefore(appStart) &&
-          utcAppointmentEnd.isSameOrAfter(appEnd))
+        selectedAppointmentStartMoment.isBetween(
+          appStart,
+          appEnd,
+          null,
+          "()"
+        ) ||
+        selectedAppointmentEndMoment.isBetween(appStart, appEnd, null, "()") ||
+        (selectedAppointmentStartMoment.isSameOrBefore(appStart) &&
+          selectedAppointmentEndMoment.isSameOrAfter(appEnd))
       );
     });
 
@@ -209,13 +219,14 @@ router.put("/:appointmentId", async (req, res) => {
       });
     }
 
+    // If everything is fine, update the appointment
     const { rows } = await db.query(
       `
       UPDATE appointments
       SET appointment_start = $1, appointment_end = $2, status = $3
       WHERE appointment_id = $4
       RETURNING *`,
-      [utcAppointmentStart, utcAppointmentEnd, status, appointmentId]
+      [selectedAppointmentStart, selectedAppointmentEnd, status, appointmentId]
     );
 
     res.json({
