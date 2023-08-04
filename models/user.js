@@ -20,7 +20,6 @@ class User {
         [user_id, professional_id]); 
       // If the professional is already saved, return false
       if (existingRelationship.rows.length > 0) {
-        console.log("here"); 
         return false;
       }
 
@@ -40,6 +39,8 @@ class User {
 
   static async getSavedMedicalProfessionals(user_id) {
     
+    console.log("user_id: ", user_id)
+
     if (!user_id) {
       throw new BadRequestError("No user id provided");
     }; 

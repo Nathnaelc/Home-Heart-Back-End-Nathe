@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const debug = require("debug");
+const cron = require('node-cron');
+const db = require("./db/db.js");
 const PORT = process.env.PORT || 3001;
 const session = require("express-session");
 const passport = require("passport");
@@ -12,6 +14,7 @@ const medicalProfessionalRouter = require("./routes/authMedProf");
 const savedProfessionalsRouter = require("./routes/SavedProfessionals");
 const appointmentsRouter = require("./routes/appointmentsApi");
 const UpdateUserInformationRouter = require("./routes/UpdateUserInformation");
+
 
 // Creating an express application
 const app = express();
@@ -29,22 +32,6 @@ app.use(express.json());
 // interpret the body data sent through requests (e.g. req.body) as JSON object
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Set up session middleware
-app.use(
-  session({
-    secret: "your-session-secret", // I will replace with a secret later
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }, // false since we use http only
-  })
-);
-// Initialize Passport and its session middleware
-app.use(passport.initialize());
-app.use(passport.session());
-
-// // middleware for parsing cookies
-// const cookieParser = require("cookie-parser");
-// app.use(cookieParser());
 
 // Adding routes for authentication
 const authRoutes = require("./routes/authRoutes");
@@ -73,6 +60,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send({ error: err.toString() });
 });
+
 
 // Start listening on the defined port
 app.listen(PORT, () => {
