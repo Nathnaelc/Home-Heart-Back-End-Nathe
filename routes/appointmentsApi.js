@@ -103,11 +103,11 @@ router.post("/booking", async (req, res) => {
     const isWithinAvailability = availabilities.some((avail) => {
       const availStartTime = moment(
         formatAppointmentStart.split(" ")[0] + " " + avail.start_time,
-        "YYYY-MM-DD HH:mm:ss"
+        "YYYY-MM-DD hh:mm:ss A"
       );
       const availEndTime = moment(
         formatAppointmentStart.split(" ")[0] + " " + avail.end_time,
-        "YYYY-MM-DD HH:mm:ss"
+        "YYYY-MM-DD hh:mm:ss A"
       );
       console.log(`avail.start_time: ${avail.start_time}`);
       console.log(`avail.end_time: ${avail.end_time}`);
@@ -183,10 +183,10 @@ router.put("/:appointmentId", async (req, res) => {
     const selectedAppointmentEndMoment = moment(appointment_end);
 
     const selectedAppointmentStart = selectedAppointmentStartMoment.format(
-      "YYYY-MM-DD HH:mm:ss"
+      "YYYY-MM-DD hh:mm:ss"
     );
     const selectedAppointmentEnd = selectedAppointmentEndMoment.format(
-      "YYYY-MM-DD HH:mm:ss"
+      "YYYY-MM-DD hh:mm:ss"
     );
 
     // Fetch the existing appointments for overlapping check
