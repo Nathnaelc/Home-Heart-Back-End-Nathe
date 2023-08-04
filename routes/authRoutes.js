@@ -7,60 +7,46 @@ const { pool } = require("../db/db");
 const { BYCRYPT_SALT_ROUNDS } = require("../config");
 const passport = require("passport");
 const User = require("../models/user");
-require("./authGoogle.js");
+// require("./authGoogle.js");
 
-// google authentication section
-router.get(
-  "/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
+router.post("/googleauth", async (req, res) => {
+  const { firstName, email } = req.body;
 
-// google auth user verification endpoint
-router.get("/api/auth/user", function (req, res) {
-  const token = req.cookies.token;
-  if (!token) {
-    return res.status(401).send({ message: "Not authenticated" });
-  }
   try {
-    const user = jwt.verify(token, "secret-key-unique");
-    res.send({ user });
-  } catch {
-    res.status(401).send({ message: "Not authenticated" });
-  }
-});
+    // Query the database for a user with the provided email
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
 
-// google auth callback endpoint
-router.get("/auth/google/callback", function (req, res, next) {
-  passport.authenticate("google", function (err, user, info) {
-    if (err) {
-      console.error("Error during /auth/google/callback: ", err);
-      return next(err);
-    }
-    if (!user) {
-      console.log(info.message);
-      return res.redirect("http://localhost:5173/register");
-    }
+    if (result.rows.length > 0) {
+      // If the user exists, authenticate them and send a response
+      const user = result.rows[0];
+      console.log("user object by google", user);
+      const token = jwt.sign(
+        {
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name,
+        },
+        "secret-key-unique",
+        {
+          expiresIn: "24h",
+        }
+      );
 
-    const token = jwt.sign(
-      {
+      res.json({
+        message: "User authenticated successfully",
+        token: token,
         userId: user.user_id,
-        username: user.username,
-        email: user.email,
-        firstName: user.first_name,
-        lastName: user.last_name,
-      },
-      "secret-key-unique",
-      {
-        expiresIn: "24h",
-      }
-    );
-
-    // Instead of setting a cookie, redirect with the token in the URL
-    console.log("Successful login. User: ", user);
-    return res.redirect(`http://localhost:5173/home?token=${token}`);
-  })(req, res, next);
+      });
+    } else {
+      // If the user does not exist, send a response indicating that they need to register
+      res.json({ message: "User not found, please register" });
+    }
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 // Register endpoint for handling user registration
@@ -173,19 +159,17 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/createUserComment", async (req, res) => {
-
   try {
-    console.log("req.body: ", req.body); 
+    console.log("req.body: ", req.body);
     const result = await User.createNewMedicalProfessionalComment(req.body);
     console.log("result: ", result);
     return res.status(200).json({
       message: "Comment successfully created",
-      result: result
-    })
+      result: result,
+    });
   } catch (err) {
-    console.log("error:", err)
+    console.log("error:", err);
   }
-})
-
+});
 
 module.exports = router;

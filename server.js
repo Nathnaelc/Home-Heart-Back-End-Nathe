@@ -11,6 +11,7 @@ const postCommentRouter = require("./routes/PostComment");
 const medicalProfessionalRouter = require("./routes/authMedProf");
 const savedProfessionalsRouter = require("./routes/SavedProfessionals");
 const appointmentsRouter = require("./routes/appointmentsApi");
+const UpdateUserInformationRouter = require("./routes/UpdateUserInformation");
 
 // Creating an express application
 const app = express();
@@ -41,9 +42,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// middleware for parsing cookies
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
+// // middleware for parsing cookies
+// const cookieParser = require("cookie-parser");
+// app.use(cookieParser());
 
 // Adding routes for authentication
 const authRoutes = require("./routes/authRoutes");
@@ -65,16 +66,12 @@ app.use("/api/post_comment", postCommentRouter);
 
 app.use("/api/medical_professional", medicalProfessionalRouter);
 
+app.use("/api/update_user_information", UpdateUserInformationRouter);
+
 // erorr detail printing
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send({ error: err.toString() });
-});
-
-app.get("/auth/google", (req, res, next) => {
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })(req, res, next);
 });
 
 // Start listening on the defined port
