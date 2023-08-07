@@ -3,8 +3,10 @@ const router = express.Router();
 const db = require("../db/db.js");
 const moment = require("moment-timezone");
 const mailgun = require("mailgun-js");
-const APIKEY = "d4a659af5d8d56d051645578a9f6742f-4e034d9e-6599eb47";
-const DOMAIN = "sandbox1c54a3a4aae944a296adc38786b38997.mailgun.org";
+
+const APIKEY = process.env.MAILGUN_API_KEY;
+const DOMAIN = process.env.MAILGUN_DOMAIN;
+
 const mg = mailgun({
   apiKey: APIKEY,
   domain: DOMAIN,

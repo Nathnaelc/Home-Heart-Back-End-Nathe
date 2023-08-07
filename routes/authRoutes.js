@@ -4,7 +4,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { pool } = require("../db/db");
-const { BYCRYPT_SALT_ROUNDS } = require("../config");
+const { BYCRYPT_SALT_ROUNDS } = require("../db/db");
 const User = require("../models/user");
 
 router.post("/googleauth", async (req, res) => {
