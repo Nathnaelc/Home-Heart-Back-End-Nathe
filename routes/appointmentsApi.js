@@ -184,10 +184,10 @@ router.post("/booking", async (req, res) => {
     if (userRows.length > 0 && userRows[0].email) {
       userEmail = userRows[0].email;
     } else {
-      console.error("Could not find email for user with ID:", user_id);
+      // console.error("Could not find email for user with ID:", user_id);
       // return or throw an error if you want to stop here
     }
-    console.log("the user rows are:", userRows);
+    // console.log("the user rows are:", userRows);
 
     // getitng the user's name
     let userName;
@@ -198,7 +198,7 @@ router.post("/booking", async (req, res) => {
     ) {
       userName = `${userRows[0].first_name} ${userRows[0].last_name}`;
     } else {
-      console.error("Could not find name for user with ID:", user_id);
+      // console.error("Could not find name for user with ID:", user_id);
     }
 
     // getting the professional's info
@@ -208,7 +208,7 @@ router.post("/booking", async (req, res) => {
       [professional_id]
     );
 
-    console.log("The professional rows", professionalRows);
+    // console.log("The professional rows", professionalRows);
 
     let professionalName;
     if (professionalRows.length > 0 && professionalRows[0].last_name) {

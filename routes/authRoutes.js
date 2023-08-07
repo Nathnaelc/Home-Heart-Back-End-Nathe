@@ -5,9 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { pool } = require("../db/db");
 const { BYCRYPT_SALT_ROUNDS } = require("../config");
-const passport = require("passport");
 const User = require("../models/user");
-// require("./authGoogle.js");
 
 router.post("/googleauth", async (req, res) => {
   const { firstName, email } = req.body;
@@ -21,7 +19,6 @@ router.post("/googleauth", async (req, res) => {
     if (result.rows.length > 0) {
       // If the user exists, authenticate them and send a response
       const user = result.rows[0];
-      console.log("user object by google", user);
       const token = jwt.sign(
         {
           email: user.email,
