@@ -20,7 +20,6 @@ class User {
       );
       // If the professional is already saved, return false
       if (existingRelationship.rows.length > 0) {
-        console.log("here");
         return false;
       }
 
@@ -78,8 +77,6 @@ class User {
   }
 
   static async createNewMedicalProfessionalComment(commentData) {
-    console.log("commentData: ", commentData);
-    console.log("date", commentData.date_posted);
     if (!commentData) {
       throw new BadRequestError("No comment data provided");
     }
