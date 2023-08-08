@@ -2,6 +2,15 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db/db.js");
 const moment = require("moment-timezone");
+const mailgun = require("mailgun-js");
+
+const APIKEY = process.env.MAILGUN_API_KEY;
+const DOMAIN = process.env.MAILGUN_DOMAIN;
+
+const mg = mailgun({
+  apiKey: APIKEY,
+  domain: DOMAIN,
+});
 
 // GET all appointments
 // the endpoint is /api/appointments with GET method
@@ -79,8 +88,8 @@ router.post("/booking", async (req, res) => {
       "YYYY-MM-DD HH:mm:ss"
     ).format("YYYY-MM-DD HH:mm:ss");
 
-    console.log(`formatAppointmentStart: ${formatAppointmentStart}`);
-    console.log(`formatAppointmentEnd: ${formatAppointmentEnd}`);
+    // console.log(`formatAppointmentStart: ${formatAppointmentStart}`);
+    // console.log(`formatAppointmentEnd: ${formatAppointmentEnd}`);
 
     // Convert the date to a day of the week so I can match it with the professional's availability table
     const date = new Date(formatAppointmentStart.split(" ")[0]);
@@ -92,7 +101,7 @@ router.post("/booking", async (req, res) => {
       [professional_id, dayOfWeek]
     );
 
-    console.log(`availabilities: ${JSON.stringify(availabilities)}`);
+    // console.log(`availabilities: ${JSON.stringify(availabilities)}`);
 
     // Check if selected time slot is within professional's availability
     const selectedStartTime = moment(
@@ -119,7 +128,7 @@ router.post("/booking", async (req, res) => {
       );
     });
 
-    console.log(`isWithinAvailability: ${isWithinAvailability}`);
+    // console.log(`isWithinAvailability: ${isWithinAvailability}`);
 
     // If not, return error
     if (!isWithinAvailability) {
@@ -164,6 +173,99 @@ router.post("/booking", async (req, res) => {
       ]
     );
     console.log("Appointment booked successfully:", rows[0]);
+
+    // Fetch the user's email based on their ID to send them email
+    const { rows: userRows } = await db.query(
+      "SELECT * FROM users WHERE user_id = $1",
+      [user_id]
+    );
+
+    // getting the user's email
+    let userEmail;
+    // Check if we got a user and an email
+    if (userRows.length > 0 && userRows[0].email) {
+      userEmail = userRows[0].email;
+    } else {
+      // console.error("Could not find email for user with ID:", user_id);
+      // return or throw an error if you want to stop here
+    }
+    // console.log("the user rows are:", userRows);
+
+    // getitng the user's name
+    let userName;
+    if (
+      userRows.length > 0 &&
+      userRows[0].first_name &&
+      userRows[0].last_name
+    ) {
+      userName = `${userRows[0].first_name} ${userRows[0].last_name}`;
+    } else {
+      // console.error("Could not find name for user with ID:", user_id);
+    }
+
+    // getting the professional's info
+    // Fetch the professional's name based on their ID
+    const { rows: professionalRows } = await db.query(
+      "SELECT last_name FROM medical_professionals WHERE professional_id = $1",
+      [professional_id]
+    );
+
+    // console.log("The professional rows", professionalRows);
+
+    let professionalName;
+    if (professionalRows.length > 0 && professionalRows[0].last_name) {
+      professionalName = professionalRows[0].last_name;
+    } else {
+      console.error(
+        "Could not find name for professional with ID:",
+        professional_id
+      );
+      // return or throw an error if you want to stop here
+    }
+
+    const appointmentDate = formatAppointmentStart.split(" ")[0];
+    const startTime = formatAppointmentStart.split(" ")[1];
+    const endTime = formatAppointmentEnd.split(" ")[1];
+
+    // Send confirmation email
+    const data = {
+      from: "Home Heart <homeheartftl@gmail.com>",
+      to: userEmail,
+      subject: `Appointment Booking Confirmation - ${new Date().toLocaleString()}`,
+      html: `
+      <div style="max-width: 600px; padding: 20px; margin: 0 auto; background-color: #ffffff; font-family: Arial, sans-serif; color: #333; border-radius: 10px; border: 1px solid #C5D9EA;">
+    <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #C5D9EA;">
+        <h1 style="color: #C5D9EA; font-size: 32px; margin-bottom: 10px;">HomeHeart</h1>
+    </div>
+    <p style="font-size: 16px; padding-top: 20px;">Dear <strong>${userName}</strong>,</p>
+    <p style="font-size: 16px;">We are thrilled to confirm your appointment with <strong>${professionalName}</strong> at Home Heart.</p>
+    <h2 style="font-size: 18px; color: #C5D9EA; border-bottom: 1px solid #C5D9EA; padding-top: 20px;">Appointment Details:</h2>
+    <ul style="list-style-type: none; padding-left: 0;">
+        <li style="font-size: 16px; padding-top: 10px;"><strong>Date:</strong> ${appointmentDate}</li>
+        <li style="font-size: 16px; padding-top: 10px;"><strong>Time:</strong> ${moment(
+          startTime,
+          "HH:mm:ss"
+        ).format("hh:mm A")} - ${moment(endTime, "HH:mm:ss").format(
+        "hh:mm A"
+      )}</li>
+        <li style="font-size: 16px; padding-top: 10px;"><strong>Location:</strong> <a href="https://meet.google.com/dyv-hgbu-xes" style="color: #333;">Join the therapy session</a></li>
+    </ul>
+    <p style="font-size: 16px; padding-top: 20px;">Our team of professionals is dedicated to providing you with the best care possible. If you have any questions or need to reschedule, please don't hesitate to contact us.</p>
+    <p style="font-size: 16px; padding-top: 10px;">Thank you for choosing Home Heart. We look forward to seeing you soon!</p>
+    <p style="font-size: 16px; padding-top: 20px; border-top: 1px solid #C5D9EA;">Sincerely,</p>
+    <p style="font-size: 16px;"><strong>The Home Heart Team</strong></p>
+</div>
+  `,
+    };
+
+    mg.messages().send(data, function (error, body) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log(body);
+      }
+    });
+
     res.json(rows[0]);
   } catch (err) {
     console.log(err);
