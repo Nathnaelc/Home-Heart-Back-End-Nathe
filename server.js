@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const debug = require("debug");
+const dotenv = require("dotenv");
+dotenv.config();
 const PORT = process.env.PORT || 3001;
 const session = require("express-session");
 const passport = require("passport");
