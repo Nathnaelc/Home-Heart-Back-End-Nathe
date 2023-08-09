@@ -21,7 +21,8 @@ router.get("/recommendations/:id", async (req, res) => {
     const response = await axios.get(
       `${FLASK_URL}/recommendations?user_id=${id}`
     );
-    const recommended_ids = response.data;
+    // Filter out NaN values since some ids are not numbers
+    const recommended_ids = response.data.filter((id) => !isNaN(id));
     console.log("recommended_ids: ", recommended_ids);
     let recommendedProfessionals = [];
 
