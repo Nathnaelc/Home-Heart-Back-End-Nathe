@@ -54,6 +54,7 @@ app.use("/api/auth", authRoutes); // route for the authentication pages (authRou
 
 // Adding routes for recommended professionals
 const gridRouter = require("./routes/authGrid");
+
 app.use("/api/recommended_professionals", gridRouter);
 app.use("/api/recommendations", gridRouter);
 app.use("/api/professional_details/:id", gridRouter);
