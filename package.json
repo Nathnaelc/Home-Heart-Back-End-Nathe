@@ -7,6 +7,9 @@
     "start": "DEBUG=app nodemon --ignore 'db/*' server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+"engines": {
+  "node": "20.3"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FTL-HomeHeart/Homeheart-backend.git"
