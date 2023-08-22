@@ -15,7 +15,7 @@ function getDatabaseUrl() {
   const dbName = process.env.DATABASE_NAME || "homeheart_database";
 
   let dbUrl = process.env.DATABASE_URL; // ||
-  // `postgresql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
+  `postgresql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 
   return {
     connectionString: dbUrl,
