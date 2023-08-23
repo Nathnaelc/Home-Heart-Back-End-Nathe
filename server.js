@@ -16,12 +16,18 @@ const savedProfessionalsRouter = require("./routes/SavedProfessionals");
 const appointmentsRouter = require("./routes/appointmentsApi");
 const UpdateUserInformationRouter = require("./routes/UpdateUserInformation");
 
-
 // Creating an express application
 const app = express();
 
 // Enabling Cross-Origin Resource Sharing (CORS) with default configuration
-app.use(cors());
+const corsOptions = {
+  origin: ["https://homeheartui-wi1z.onrender.com", "http://localhost:3000"],
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 // Setting up morgan to log HTTP requests in the 'dev' format
 app.use(morgan("dev"));
@@ -32,7 +38,6 @@ app.use(express.json());
 // Enabling express to parse URL-encoded bodies from HTTP requests
 // interpret the body data sent through requests (e.g. req.body) as JSON object
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 // Adding routes for authentication
 const authRoutes = require("./routes/authRoutes");
@@ -62,7 +67,6 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send({ error: err.toString() });
 });
-
 
 // Start listening on the defined port
 app.listen(PORT, () => {
