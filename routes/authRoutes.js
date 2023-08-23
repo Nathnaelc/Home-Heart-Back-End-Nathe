@@ -99,17 +99,17 @@ router.post("/register", async (req, res) => {
     console.log(err.stack);
     res.status(500).json({
       message: "Error registering user",
-      error: err.message,
+      error: err.stack,
     });
   }
 });
 
 // Login endpoint for handling user login using username/email and password
 router.post("/login", async (req, res) => {
-  const { identifier, password } = req.body;
+  const { username, password } = req.body;
   try {
-    const getUserQuery = `SELECT * FROM users WHERE email = $1 OR username = $1`;
-    const result = await pool.query(getUserQuery, [identifier]);
+    const getUserQuery = `SELECT * FROM users WHERE username = $1`;
+    const result = await pool.query(getUserQuery, [username]);
     const user = result.rows[0];
     if (!user) {
       return res.status(404).json({
@@ -147,10 +147,10 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
-    console.log("Error logging in user: " + err);
+    console.log("Error logging in user: ", err);
     res.status(500).json({
       message: "Error logging in user",
-      error: err.message,
+      error: err.stack,
     });
   }
 });
